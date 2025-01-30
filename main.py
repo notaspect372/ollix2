@@ -230,14 +230,15 @@ def scrape_data(brands, start_page, end_page):      # Configure Edge options
                     price_elements = driver.find_elements(By.CSS_SELECTOR, "span.box-price-pcsPerCarton")
 
                     # Extract correct price based on variant_id
-                    variant_price = None
-                    variant_compare_price = None
-
-                    for price_element in price_elements:
-                        if price_element.get_attribute("data-id") == variant_id:
-                            variant_price = price_element.get_attribute("data-price")
-                            variant_compare_price = price_element.get_attribute("data-compare-price")
-                            break  # Stop after finding the correct one
+                    if length_of_variations>1:
+                        for price_element in price_elements:
+                            if price_element.get_attribute("data-id") == variant_id:
+                                variant_price = price_element.get_attribute("data-price")
+                                variant_compare_price = price_element.get_attribute("data-compare-price")
+                                break  
+                    else:
+                        variant_price = driver.find_element(By.CSS_SELECTOR, "span.box-price-pcsPerCarton").get_attribute("data-price")
+                        variant_compare_price = driver.find_element(By.CSS_SELECTOR, "span.box-price-pcsPerCarton").get_attribute("data-compare-price")
 
 
                     price_per_sq_ft_text = ""
