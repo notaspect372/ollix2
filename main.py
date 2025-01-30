@@ -348,12 +348,16 @@ def scrape_data(brands, start_page, end_page):      # Configure Edge options
                     except:
                         pass
 
-                    try:
-                        selected_image_element = driver.find_element(By.CSS_SELECTOR, ".product-gallery__carousel-item.is-selected img")
-                        selected_image_url = selected_image_element.get_attribute("src")
-                    except Exception as e:
-                        print(f"Error finding selected image: {e}")
-                        selected_image_url = ""
+                    selected_image_url = ""
+                    if length_of_variations>1:
+                        try:
+                            selected_image_element = driver.find_element(By.CSS_SELECTOR, ".product-gallery__carousel-item.is-selected img")
+                            selected_image_url = selected_image_element.get_attribute("src")
+                        except Exception as e:
+                            print(f"Error finding selected image: {e}")
+            
+                    else:
+                        selected_image_url = all_image_src[1]
 
                     # Append data
                     scraped_data.append({
