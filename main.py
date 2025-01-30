@@ -256,11 +256,20 @@ def scrape_data(brands, start_page, end_page):      # Configure Edge options
                     except:
                         pass
 
-                    variant_barcode = ""
-                    try:
-                        variant_barcode = driver.find_element(By.CSS_SELECTOR, "tr.table-row-spec.barcode-container.d-none").get_attribute("data-value")
-                    except:
-                        pass
+                   
+                    if length_of_variations > 1:
+                        variant_barcode = ""
+                        try:
+                            variant_barcode = driver.find_element(By.CSS_SELECTOR, "tr.table-row-spec.barcode-container.d-none").get_attribute("data-value")
+                        except:
+                            pass
+                    else:
+                        variant_barcode = ""
+                        try:
+                            barcode_element = driver.find_element(By.CSS_SELECTOR, "tr.table-row-spec.barcode-container")
+                            variant_barcode = barcode_element.get_attribute("data-value")
+                        except:
+                            pass
 
                     weight = ""
                     try:
