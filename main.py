@@ -209,7 +209,6 @@ def scrape_data(brands, start_page, end_page):      # Configure Edge options
                 # Loop through variations
                 image_positions = list(range(1, len(filtered_images) + 1))
 
-                variation_names = []
                 length_of_variations = len(variations)
                 for idx, variation in enumerate(variations):
                     label = driver.find_element(By.CSS_SELECTOR, f"label[for='{variation.get_attribute('id')}']")
@@ -224,7 +223,6 @@ def scrape_data(brands, start_page, end_page):      # Configure Edge options
                     variant_id = current_url.split("variant=")[-1]
 
                     variation_name = variation.get_attribute("value")
-                    variation_names.append(variation_name)  
                     option2_value = driver.find_element(By.CSS_SELECTOR, "span.product-form__selected-value").text.strip()
                     variant_sku = driver.find_element(By.CSS_SELECTOR, "span.product-meta__sku-number").text.strip()
 
@@ -340,11 +338,18 @@ def scrape_data(brands, start_page, end_page):      # Configure Edge options
                     except:
                         pass
 
+                    try:
+                        selected_image_element = driver.find_element(By.CSS_SELECTOR, ".product-gallery__carousel-item.is-selected img")
+                        selected_image_url = selected_image_element.get_attribute("src")
+                    except Exception as e:
+                        print(f"Error finding selected image: {e}")
+                        selected_image_url = ""
+
                     # Append data
                     scraped_data.append({
                         "Handle": handle,
                         "Title": title,
-                        "Variation": "",
+                        "Variation":variation_name,
                         "Body (HTML)": relevant_table_html,
                         "Vendor": vendor,
                         "Type": breadcrumb_type,
@@ -379,7 +384,7 @@ def scrape_data(brands, start_page, end_page):      # Configure Edge options
                         "pcsperbox (product.metafields.custom.pcsperbox)": pcs_per_box,
                         "Price Per Sq Ft (product.metafields.custom.price_per_sq_ft)": price_per_sq_ft_text,
                         "Image Src": filtered_images[idx] if idx < len(filtered_images) else "",
-                        "Variant Image": variation_images[idx] if idx < len(variation_images) else "",
+                        "Variant Image": selected_image_url,
                         "Image Position": image_positions[idx] if idx < len(image_positions) else None,
                         "Original Price": original_price,
                         "Surface Type (product.metafields.custom.surface_type)": surface_attribute,
@@ -391,12 +396,7 @@ def scrape_data(brands, start_page, end_page):      # Configure Edge options
             except Exception as e:
                 print(f"Error scraping product {product_url}: {e}")
 
-    variation_names.reverse()
-
-    # Update the scraped_data dictionary with reversed variation names
-    for i in range(len(scraped_data)):
-        scraped_data[i]["Variation"] = variation_names[i]
-
+    
     df = pd.DataFrame(scraped_data)
     df.to_excel("scraped_data.xlsx", index=False, engine='openpyxl')
 
