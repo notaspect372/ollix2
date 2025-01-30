@@ -209,6 +209,7 @@ def scrape_data(brands, start_page, end_page):      # Configure Edge options
                 # Loop through variations
                 image_positions = list(range(1, len(filtered_images) + 1))
 
+                variation_names = []
                 length_of_variations = len(variations)
                 for idx, variation in enumerate(variations):
                     label = driver.find_element(By.CSS_SELECTOR, f"label[for='{variation.get_attribute('id')}']")
@@ -223,6 +224,7 @@ def scrape_data(brands, start_page, end_page):      # Configure Edge options
                     variant_id = current_url.split("variant=")[-1]
 
                     variation_name = variation.get_attribute("value")
+                    variation_names.append(variation_name)  
                     option2_value = driver.find_element(By.CSS_SELECTOR, "span.product-form__selected-value").text.strip()
                     variant_sku = driver.find_element(By.CSS_SELECTOR, "span.product-meta__sku-number").text.strip()
 
@@ -342,7 +344,7 @@ def scrape_data(brands, start_page, end_page):      # Configure Edge options
                     scraped_data.append({
                         "Handle": handle,
                         "Title": title,
-                        "Variation": variation_name,
+                        "Variation": "",
                         "Body (HTML)": relevant_table_html,
                         "Vendor": vendor,
                         "Type": breadcrumb_type,
@@ -388,6 +390,12 @@ def scrape_data(brands, start_page, end_page):      # Configure Edge options
 
             except Exception as e:
                 print(f"Error scraping product {product_url}: {e}")
+
+    variation_names.reverse()
+
+    # Update the scraped_data dictionary with reversed variation names
+    for i in range(len(scraped_data)):
+        scraped_data[i]["Variation"] = variation_names[i]
 
     df = pd.DataFrame(scraped_data)
     df.to_excel("scraped_data.xlsx", index=False, engine='openpyxl')
